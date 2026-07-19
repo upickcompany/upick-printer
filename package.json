@@ -1,7 +1,7 @@
 {
   "name": "upick-printer-agent",
   "private": true,
-  "version": "1.0.0",
+  "version": "1.0.1",
   "type": "module",
   "main": "dist-electron/main.js",
   "scripts": {
@@ -16,6 +16,7 @@
     "electron-store": "^11.0.2",
     "escpos": "^3.0.0-alpha.6",
     "escpos-network": "^3.0.0-alpha.5",
+    "escpos-usb": "^3.0.0-alpha.4",
     "react": "^19.2.6",
     "react-dom": "^19.2.6"
   },

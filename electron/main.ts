@@ -28,6 +28,31 @@ let win: BrowserWindow | null
 let tray: Tray | null = null
 let isQuitting = false
 
+const originalConsoleLog = console.log;
+const originalConsoleError = console.error;
+
+console.log = (...args) => {
+  originalConsoleLog(...args);
+  if (win && !win.isDestroyed()) {
+    const serializedArgs = args.map(a => {
+      if (a instanceof Error) return a.stack || a.message;
+      return typeof a === 'object' && a !== null ? JSON.stringify(a, null, 2) : a;
+    });
+    win.webContents.send('main-console-log', ...serializedArgs);
+  }
+};
+
+console.error = (...args) => {
+  originalConsoleError(...args);
+  if (win && !win.isDestroyed()) {
+    const serializedArgs = args.map(a => {
+      if (a instanceof Error) return a.stack || a.message;
+      return typeof a === 'object' && a !== null ? JSON.stringify(a, null, 2) : a;
+    });
+    win.webContents.send('main-console-error', ...serializedArgs);
+  }
+};
+
 import { setupSupabaseRealtime } from './supabase'
 import { testPrinter } from './printer'
 import { store } from './store'
@@ -83,15 +108,21 @@ function createWindow() {
   ipcMain.handle('get-config', () => {
     return {
       restaurantId: store.get('restaurantId'),
+      connectionType: store.get('connectionType') || 'network',
       printerIp: store.get('printerIp'),
-      printerPort: store.get('printerPort')
+      printerPort: store.get('printerPort'),
+      printerVid: store.get('printerVid'),
+      printerPid: store.get('printerPid')
     }
   })
 
   ipcMain.handle('save-config', async (_, config) => {
     store.set('restaurantId', config.restaurantId)
+    store.set('connectionType', config.connectionType)
     store.set('printerIp', config.printerIp)
-    store.set('printerPort', Number(config.printerPort))
+    store.set('printerPort', Number(config.printerPort) || 9100)
+    store.set('printerVid', config.printerVid)
+    store.set('printerPid', config.printerPid)
     
     // Restart supabase listener with new ID
     setupSupabaseRealtime((status) => {
@@ -101,8 +132,8 @@ function createWindow() {
     return true
   })
 
-  ipcMain.handle('test-printer', async (_, { ip, port }) => {
-    return await testPrinter(ip, Number(port))
+  ipcMain.handle('test-printer', async (_, config) => {
+    return await testPrinter(config)
   })
 
   // Test active push message to Renderer-process.
