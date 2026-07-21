@@ -60,10 +60,13 @@ import { store } from './store'
 function createWindow() {
   const iconPath = path.join(process.env.VITE_PUBLIC!, 'icon.png')
 
+  const startHidden = app.isPackaged && process.argv.includes('--hidden')
+
   win = new BrowserWindow({
     width: 600,
     height: 700,
     icon: iconPath,
+    show: !startHidden,
     webPreferences: {
       preload: path.join(__dirname, 'preload.mjs'),
       contextIsolation: true,
@@ -73,10 +76,20 @@ function createWindow() {
   })
 
   // Set up auto-launch on system startup
-  app.setLoginItemSettings({
-    openAtLogin: true,
-    path: app.getPath('exe'),
-  })
+  if (app.isPackaged) {
+    app.setLoginItemSettings({
+      openAtLogin: true,
+      path: app.getPath('exe'),
+      args: ['--hidden']
+    })
+  } else {
+    // Si estamos en desarrollo, nos aseguramos de que no esté activado
+    // para limpiar cualquier registro previo
+    app.setLoginItemSettings({
+      openAtLogin: false,
+      path: app.getPath('exe')
+    })
+  }
 
   // Prevent app from quitting when window is closed
   win.on('close', (event) => {
@@ -92,10 +105,11 @@ function createWindow() {
   const contextMenu = Menu.buildFromTemplate([
     { label: 'Abrir UPick Printer', click: () => win?.show() },
     { type: 'separator' },
-    { label: 'Salir Completamente', click: () => {
+    {
+      label: 'Salir Completamente', click: () => {
         isQuitting = true
         app.quit()
-      } 
+      }
     }
   ])
   tray.setToolTip('UPick Printer Agent')
@@ -112,7 +126,8 @@ function createWindow() {
       printerIp: store.get('printerIp'),
       printerPort: store.get('printerPort'),
       printerVid: store.get('printerVid'),
-      printerPid: store.get('printerPid')
+      printerPid: store.get('printerPid'),
+      printAdvanceMinutes: store.get('printAdvanceMinutes') || 0
     }
   })
 
@@ -123,12 +138,13 @@ function createWindow() {
     store.set('printerPort', Number(config.printerPort) || 9100)
     store.set('printerVid', config.printerVid)
     store.set('printerPid', config.printerPid)
-    
+    store.set('printAdvanceMinutes', Number(config.printAdvanceMinutes) || 0)
+
     // Restart supabase listener with new ID
     setupSupabaseRealtime((status) => {
       win?.webContents.send('supabase-status', status)
     })
-    
+
     return true
   })
 

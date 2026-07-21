@@ -7,6 +7,7 @@ function App() {
   const [printerPort, setPrinterPort] = useState('9100')
   const [printerVid, setPrinterVid] = useState('')
   const [printerPid, setPrinterPid] = useState('')
+  const [printAdvanceMinutes, setPrintAdvanceMinutes] = useState('0')
   const [status, setStatus] = useState<'disconnected' | 'connected' | 'error'>('disconnected')
   const [isSaving, setIsSaving] = useState(false)
   const [isTesting, setIsTesting] = useState(false)
@@ -20,6 +21,7 @@ function App() {
       if (config.printerPort) setPrinterPort(String(config.printerPort))
       if (config.printerVid) setPrinterVid(config.printerVid)
       if (config.printerPid) setPrinterPid(config.printerPid)
+      if (config.printAdvanceMinutes !== undefined) setPrintAdvanceMinutes(String(config.printAdvanceMinutes))
     })
 
     // Listen for supabase status updates
@@ -44,7 +46,8 @@ function App() {
       printerIp, 
       printerPort,
       printerVid,
-      printerPid
+      printerPid,
+      printAdvanceMinutes
     })
     setIsSaving(false)
     alert('Configuración guardada. Escuchando nuevas órdenes...')
@@ -91,6 +94,18 @@ function App() {
               onChange={e => setRestaurantId(e.target.value)}
               className="w-full bg-neutral-50 border border-neutral-200 rounded-xl px-4 py-3 text-neutral-900 focus:ring-2 focus:ring-red-600/50 focus:border-red-600 outline-none transition-all placeholder-neutral-400 font-medium"
               placeholder="Ej: cm4z..."
+            />
+          </div>
+
+          <div>
+            <label className="block text-sm font-semibold text-neutral-700 mb-1">Minutos antes de imprimir (0 = de inmediato)</label>
+            <input 
+              type="number" 
+              value={printAdvanceMinutes}
+              onChange={e => setPrintAdvanceMinutes(e.target.value)}
+              className="w-full bg-neutral-50 border border-neutral-200 rounded-xl px-4 py-3 text-neutral-900 focus:ring-2 focus:ring-red-600/50 focus:border-red-600 outline-none transition-all placeholder-neutral-400 font-medium"
+              placeholder="Ej: 30"
+              min="0"
             />
           </div>
 
