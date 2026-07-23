@@ -4,6 +4,7 @@ const escpos = require('escpos');
 const Network = require('escpos-network');
 const USB = require('escpos-usb');
 import { store } from './store';
+import { parseColombianDate } from './timeUtils';
 
 // We need to polyfill some things for escpos if needed, but usually it works fine in Node
 // We attach the network and usb adapters to escpos
@@ -71,8 +72,8 @@ export async function printOrder(orderData: any): Promise<boolean> {
           
           let pickupStr = '';
           if (orderData.pickupSlotStart) {
-            const pickupStart = new Date(orderData.pickupSlotStart).toLocaleTimeString('es-CO', dateOptions);
-            const pickupEnd = new Date(orderData.pickupSlotEnd).toLocaleTimeString('es-CO', dateOptions);
+            const pickupStart = parseColombianDate(orderData.pickupSlotStart)?.toLocaleTimeString('es-CO', dateOptions) || '';
+            const pickupEnd = parseColombianDate(orderData.pickupSlotEnd)?.toLocaleTimeString('es-CO', dateOptions) || '';
             pickupStr = `${pickupStart} - ${pickupEnd}`;
           }
 

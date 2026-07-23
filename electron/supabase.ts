@@ -2,6 +2,7 @@
 import { createClient } from '@supabase/supabase-js';
 import { store } from './store';
 import { printOrder } from './printer';
+import { parseColombianDate } from './timeUtils';
 
 // Leer variables de entorno (cargadas por Vite en import.meta.env)
 const supabaseUrl = import.meta.env.VITE_SUPABASE_URL || '';
@@ -83,7 +84,7 @@ async function handleOrder(orderId: string) {
     let delayMs = 0;
 
     if (printAdvanceMinutes > 0 && fullOrder.pickupSlotStart) {
-      const pickupTime = new Date(fullOrder.pickupSlotStart);
+      const pickupTime = parseColombianDate(fullOrder.pickupSlotStart)!;
       const printTime = new Date(pickupTime.getTime() - printAdvanceMinutes * 60 * 1000);
       
       if (printTime > now) {
