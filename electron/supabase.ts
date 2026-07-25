@@ -84,11 +84,13 @@ async function handleOrder(orderId: string) {
     let delayMs = 0;
 
     if (printAdvanceMinutes > 0 && fullOrder.pickupSlotStart) {
-      const pickupTime = parseColombianDate(fullOrder.pickupSlotStart)!;
-      const printTime = new Date(pickupTime.getTime() - printAdvanceMinutes * 60 * 1000);
-      
-      if (printTime > now) {
-        delayMs = printTime.getTime() - now.getTime();
+      const pickupTime = parseColombianDate(fullOrder.pickupSlotStart);
+      if (pickupTime) {
+        const printTime = new Date(pickupTime.getTime() - printAdvanceMinutes * 60 * 1000);
+        
+        if (printTime > now) {
+          delayMs = printTime.getTime() - now.getTime();
+        }
       }
     }
 

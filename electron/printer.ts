@@ -4,7 +4,7 @@ const escpos = require('escpos');
 const Network = require('escpos-network');
 const USB = require('escpos-usb');
 import { store } from './store';
-import { parseColombianDate } from './timeUtils';
+import { formatColombianTime } from './timeUtils';
 
 // We need to polyfill some things for escpos if needed, but usually it works fine in Node
 // We attach the network and usb adapters to escpos
@@ -65,15 +65,10 @@ export async function printOrder(orderData: any): Promise<boolean> {
         }
 
         try {
-          // Opciones de formato de fecha para Colombia
-          const dateOptions: Intl.DateTimeFormatOptions = { 
-            timeZone: 'America/Bogota', hour: '2-digit', minute: '2-digit', hour12: true 
-          };
-          
           let pickupStr = '';
           if (orderData.pickupSlotStart) {
-            const pickupStart = parseColombianDate(orderData.pickupSlotStart)?.toLocaleTimeString('es-CO', dateOptions) || '';
-            const pickupEnd = parseColombianDate(orderData.pickupSlotEnd)?.toLocaleTimeString('es-CO', dateOptions) || '';
+            const pickupStart = formatColombianTime(orderData.pickupSlotStart);
+            const pickupEnd = formatColombianTime(orderData.pickupSlotEnd);
             pickupStr = `${pickupStart} - ${pickupEnd}`;
           }
 
