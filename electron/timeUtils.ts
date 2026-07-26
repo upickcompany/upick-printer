@@ -24,16 +24,28 @@ export function parseColombianDate(dateInput: string | Date | null | undefined):
 }
 
 export function formatColombianTime(dateInput: string | Date | null | undefined): string {
+  if (!dateInput) return '';
+
   const date = parseColombianDate(dateInput);
   if (!date) return '';
 
-  const dateOptions: Intl.DateTimeFormatOptions = { 
-    timeZone: 'America/Bogota', 
-    hour: '2-digit', 
-    minute: '2-digit', 
-    hour12: true 
-  };
+  // En Electron en Windows, toLocaleTimeString con { timeZone: 'America/Bogota' }
+  // suele fallar o ignorar la zona horaria devolviendo la hora UTC pura (ej. 18:00 en lugar de 13:00).
+  // Para solucionar esto de forma 100% garantizada en cualquier sistema operativo,
+  // restamos manualmente 5 horas (UTC-5 Colombia, sin horario de verano)
+  // y leemos la hora UTC resultante.
+  const colombiaMs = date.getTime() - (5 * 60 * 60 * 1000);
+  const colDate = new Date(colombiaMs);
 
-  return date.toLocaleTimeString('es-CO', dateOptions).replace(/[\u00A0\u202F]/g, ' ');
+  let hours = colDate.getUTCHours();
+  const minutes = colDate.getUTCMinutes();
+  const ampm = hours >= 12 ? 'PM' : 'AM';
+
+  hours = hours % 12 || 12;
+  const hourStr = hours < 10 ? '0' + hours : hours;
+  const minStr = minutes < 10 ? '0' + minutes : minutes;
+
+  return `${hourStr}:${minStr} ${ampm}`;
 }
+
 

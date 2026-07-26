@@ -70,6 +70,7 @@ export async function printOrder(orderData: any): Promise<boolean> {
             const pickupStart = formatColombianTime(orderData.pickupSlotStart);
             const pickupEnd = formatColombianTime(orderData.pickupSlotEnd);
             pickupStr = `${pickupStart} - ${pickupEnd}`;
+            console.log('[PRINTER] Raw slotStart:', orderData.pickupSlotStart, '-> Formatted:', pickupStr);
           }
 
           // FORMATTING THE RECEIPT
