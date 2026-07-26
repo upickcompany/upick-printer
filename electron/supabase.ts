@@ -95,7 +95,8 @@ async function handleOrder(orderId: string) {
     }
 
     if (delayMs > 0) {
-      console.log(`Orden #${fullOrder.pickupCode} programada para imprimir en ${Math.round(delayMs / 60000)} minutos.`);
+      const printTimeStr = new Date(now.getTime() + delayMs).toLocaleTimeString('es-CO');
+      console.log(`[SCHEDULE] Orden #${fullOrder.pickupCode} programada en ${Math.round(delayMs / 60000)} min. (Hora calculada: ${printTimeStr})`);
       scheduledOrders.add(orderId);
       
       setTimeout(async () => {

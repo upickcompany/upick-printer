@@ -14,8 +14,8 @@ export function parseColombianDate(dateInput: string | Date | null | undefined):
     const hasTimezone = /[Zz]|\d{2}:\d{2}[+-]\d{2}:?\d{2}$|[+-]\d{2}:?\d{2}$/.test(str);
 
     if (!hasTimezone) {
-      // Si no tiene zona horaria, asumimos que representa la hora local de Colombia (-05:00)
-      str = str.includes('T') ? `${str}-05:00` : `${str.replace(' ', 'T')}-05:00`;
+      // Si no tiene zona horaria, como Supabase siempre guarda en UTC, le agregamos 'Z'
+      str = str.includes('T') ? `${str}Z` : `${str.replace(' ', 'T')}Z`;
     }
   }
 

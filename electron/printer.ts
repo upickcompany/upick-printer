@@ -57,6 +57,34 @@ export async function printOrder(orderData: any): Promise<boolean> {
       const options = { encoding: "GB18030" /* default */ };
       const printer = new escpos.Printer(device, options);
 
+      let pickupStr = '';
+      if (orderData.pickupSlotStart) {
+        const pickupStart = formatColombianTime(orderData.pickupSlotStart);
+        const pickupEnd = formatColombianTime(orderData.pickupSlotEnd);
+        pickupStr = `${pickupStart} - ${pickupEnd}`;
+        console.log('[PRINTER] Raw slotStart:', orderData.pickupSlotStart, '-> Formatted:', pickupStr);
+      }
+
+      // --- LOGGING TO TERMINAL FOR DEBUGGING ---
+      console.log(`\n========== TICKET PREVIEW: ORDEN #${orderData.pickupCode} ==========`);
+      console.log(`UPick`);
+      console.log(`Pedido #${orderData.pickupCode}`);
+      console.log(`PAGADO`);
+      console.log(`--------------------------------`);
+      console.log(`Cliente: ${orderData.student?.firstName || 'Usuario'}`);
+      if (pickupStr) {
+        console.log(`Recoger: ${pickupStr}`);
+      }
+      console.log(`--------------------------------`);
+      if (orderData.items && orderData.items.length > 0) {
+        orderData.items.forEach((item: any) => {
+          console.log(`${item.quantity}x ${item.product?.name || 'Producto'}`);
+        });
+      }
+      console.log(`--------------------------------`);
+      console.log(`Gracias por usar UPick!`);
+      console.log(`====================================================\n`);
+
       device.open((error: any) => {
         if (error) {
           console.error('Error connecting to printer:', error);
@@ -65,14 +93,6 @@ export async function printOrder(orderData: any): Promise<boolean> {
         }
 
         try {
-          let pickupStr = '';
-          if (orderData.pickupSlotStart) {
-            const pickupStart = formatColombianTime(orderData.pickupSlotStart);
-            const pickupEnd = formatColombianTime(orderData.pickupSlotEnd);
-            pickupStr = `${pickupStart} - ${pickupEnd}`;
-            console.log('[PRINTER] Raw slotStart:', orderData.pickupSlotStart, '-> Formatted:', pickupStr);
-          }
-
           // FORMATTING THE RECEIPT
           printer
             .font('a')
